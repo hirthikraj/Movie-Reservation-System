@@ -18,8 +18,8 @@ import java.util.concurrent.locks.ReentrantLock;
 @Service
 public class ShowSeatService {
 
-    ShowSeatRepository showSeatRepository;
-    SeatLock seatLock;
+    private final ShowSeatRepository showSeatRepository;
+    private final SeatLock seatLock;
 
     @Autowired
     ShowSeatService(ShowSeatRepository showSeatRepository,SeatLock seatLock)

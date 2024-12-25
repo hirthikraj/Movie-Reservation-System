@@ -16,10 +16,10 @@ import java.util.List;
 @Service
 public class ShowService {
 
-    ShowRepository showRepository;
-    MovieService movieService;
-    ScreenService screenService;
-    ShowSeatService showSeatService;
+    private final ShowRepository showRepository;
+    private final MovieService movieService;
+    private final ScreenService screenService;
+    public final ShowSeatService showSeatService;
 
     @Autowired
     ShowService(ShowRepository showRepository,MovieService movieService,ScreenService screenService,ShowSeatService showSeatService)

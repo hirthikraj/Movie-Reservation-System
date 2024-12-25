@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SeatService {
-    SeatRepository seatRepository;
+    private final SeatRepository seatRepository;
 
     @Autowired
     SeatService(SeatRepository seatRepository)

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MovieService {
 
-    MovieRepository movieRepository;
+    private final MovieRepository movieRepository;
 
     @Autowired
     MovieService(MovieRepository movieRepository)

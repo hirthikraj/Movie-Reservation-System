@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,6 +25,7 @@ public class UserController {
         this.userService = userService;
     }
 
+    @Secured({"ROLE_SUPER_ADMIN"})
     @GetMapping("/all")
     public ResponseEntity<PagedAPIResponseDTO> getAllUsers(
             @RequestParam int page,
@@ -45,6 +47,7 @@ public class UserController {
                 );
     }
 
+    @Secured({"ROLE_SUPER_ADMIN"})
     @PostMapping("/user/create")
     public ResponseEntity<APIResponseDTO> createNewUser(@RequestBody UserRequestDTO userRequestDTO)
     {
@@ -52,7 +55,7 @@ public class UserController {
 
         UserResponseDTO userResponseDTO = UserResponseDTO.builder()
                 .userId(newUser.getUserId())
-                .userName(newUser.getUserName())
+                .userName(newUser.getUsername())
                 .firstName(newUser.getFirstName())
                 .lastName(newUser.getLastName())
                 .userEmail(newUser.getUserEmail())
@@ -72,6 +75,7 @@ public class UserController {
     }
 
 
+    @Secured({"ROLE_SUPER_ADMIN"})
     @GetMapping("user/{userId}")
     public ResponseEntity<APIResponseDTO> getUserById(@PathVariable Long userId)
     {
@@ -81,7 +85,7 @@ public class UserController {
                 = UserResponseDTO
                 .builder()
                 .userId(user.getUserId())
-                .userName(user.getUserName())
+                .userName(user.getUsername())
                 .userEmail(user.getUserEmail())
                 .firstName(user.getUserEmail())
                 .lastName(user.getLastName())
@@ -99,13 +103,14 @@ public class UserController {
                 );
     }
 
+    @Secured({"ROLE_SUPER_ADMIN"})
     @PutMapping("user/{userId}")
     public ResponseEntity<APIResponseDTO> updateUser(@PathVariable Long userId,@RequestBody UserRequestDTO userRequestDTO)
     {
         User updatedUser = userService.updateUserById(userId,userRequestDTO);
         UserResponseDTO userResponseDTO = UserResponseDTO.builder()
                 .userId(updatedUser.getUserId())
-                .userName(updatedUser.getUserName())
+                .userName(updatedUser.getUsername())
                 .firstName(updatedUser.getFirstName())
                 .lastName(updatedUser.getLastName())
                 .userEmail(updatedUser.getUserEmail())
@@ -124,6 +129,7 @@ public class UserController {
                 );
     }
 
+    @Secured({"ROLE_SUPER_ADMIN"})
     @DeleteMapping("user/{userId}")
     public ResponseEntity<APIResponseDTO> deleteUserById(@PathVariable Long userId)
     {
@@ -139,4 +145,5 @@ public class UserController {
                                 .build()
                 );
     }
+
 }

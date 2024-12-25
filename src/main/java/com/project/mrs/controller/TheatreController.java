@@ -2,24 +2,34 @@ package com.project.mrs.controller;
 
 import com.project.mrs.dto.*;
 import com.project.mrs.dto.theatre.TheatreRequestDTO;
+import com.project.mrs.dto.user.TheatreAdminRequestDTO;
 import com.project.mrs.entity.Theatre;
+import com.project.mrs.entity.User;
 import com.project.mrs.service.TheatreService;
+import com.project.mrs.service.UserService;
+import com.project.mrs.validation.UserRoleValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/theatres")
 public class TheatreController {
 
-    TheatreService theatreService;
+    private final TheatreService theatreService;
+    private final UserService userService;
+    private final UserRoleValidationService userRoleValidationService;
 
     @Autowired
-    TheatreController(TheatreService theatreService)
+    TheatreController(TheatreService theatreService, UserService userService, UserRoleValidationService userRoleValidationService)
     {
         this.theatreService = theatreService;
+        this.userService = userService;
+        this.userRoleValidationService = userRoleValidationService;
     }
 
     @GetMapping("/all")
@@ -55,6 +65,7 @@ public class TheatreController {
                 );
     }
 
+    @Secured({"ROLE_SUPER_ADMIN"})
     @PostMapping("/theatre/create")
     public ResponseEntity<APIResponseDTO> createNewTheatre(@RequestBody TheatreRequestDTO theatreRequestDTO)
     {
@@ -69,6 +80,7 @@ public class TheatreController {
                 );
     }
 
+    @PreAuthorize("@userRoleValidationService.isUserHavePermissionToPerformWriteOperationForTheatre(#theatreId)")
     @PutMapping("theatre/{theatreId}")
     public ResponseEntity<APIResponseDTO> updateTheatreById(@PathVariable Long theatreId,@RequestBody TheatreRequestDTO theatreRequestDTO)
     {
@@ -83,6 +95,7 @@ public class TheatreController {
                 );
     }
 
+    @PreAuthorize("@userRoleValidationService.isUserHavePermissionToPerformWriteOperationForTheatre(#theatreId)")
     @DeleteMapping("theatre/{theatreId}")
     public ResponseEntity<APIResponseDTO> deleteTheatreById(@PathVariable Long userId)
     {
@@ -95,6 +108,38 @@ public class TheatreController {
                         APIResponseDTO
                                 .builder()
                                 .message("Deleted the theatre with the id: "+deletedTheatre.getTheatreId()+" and name: "+deletedTheatre.getTheatreName()+".")
+                                .build()
+                );
+    }
+
+    @PreAuthorize("@userRoleValidationService.isUserHavePermissionToPerformWriteOperationForTheatre(#theatreAdminRequestDTO.theatreId)")
+    @PostMapping("theatre/admin")
+    public ResponseEntity<APIResponseDTO> addTheatreAdmin(@RequestBody TheatreAdminRequestDTO theatreAdminRequestDTO)
+    {
+        Theatre theatre = theatreService.addTheatreAdmin(theatreAdminRequestDTO);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(
+                        APIResponseDTO
+                                .builder()
+                                .message("Added the theatre admin to theatre name: "+theatre.getTheatreName()+".")
+                                .build()
+                );
+    }
+
+    @PreAuthorize("@userRoleValidationService.isUserHavePermissionToPerformWriteOperationForTheatre(#theatreAdminRequestDTO.theatreId)")
+    @DeleteMapping("theatre/admin")
+    public ResponseEntity<APIResponseDTO> removeTheatreAdmin(@RequestBody TheatreAdminRequestDTO theatreAdminRequestDTO)
+    {
+        User user = userService.getUserById(theatreAdminRequestDTO.getUserId());
+        Theatre theatre = theatreService.removeTheatreAdmin(theatreAdminRequestDTO);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(
+                        APIResponseDTO
+                                .builder()
+                                .message("Removed the theatre admin to theatre name: "+theatre.getTheatreName()+".")
                                 .build()
                 );
     }

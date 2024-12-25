@@ -22,10 +22,10 @@ import static com.project.mrs.constants.ExceptionConstants.RESERVATION_NOT_CANCE
 @Service
 public class ReservationService {
 
-    ReservationRepository reservationRepository;
-    UserService userService;
-    ShowService showService;
-    TheatreService theatreService;
+    private final ReservationRepository reservationRepository;
+    private final UserService userService;
+    private final  ShowService showService;
+    private final TheatreService theatreService;
 
     @Autowired
     ReservationService(ReservationRepository reservationRepository,ShowService showService,UserService userService,TheatreService theatreService)
@@ -34,6 +34,11 @@ public class ReservationService {
         this.showService = showService;
         this.userService = userService;
         this.theatreService = theatreService;
+    }
+
+    public Reservation getReservationById(Long reservationId)
+    {
+        return reservationRepository.findById(reservationId).orElseThrow(() -> new ReservationNotFoundException(ExceptionConstants.RESERVATION_NOT_FOUND,HttpStatus.NOT_FOUND));
     }
 
     public Reservation createNewReservation(ReservationRequestDTO reservationRequestDTO)
@@ -72,7 +77,7 @@ public class ReservationService {
 
     public boolean cancelReservation(Long reservationId)
     {
-        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new ReservationNotFoundException(ExceptionConstants.RESERVATION_NOT_FOUND,HttpStatus.NOT_FOUND));
+        Reservation reservation = getReservationById(reservationId);
         if(reservation.getReservationStatus() == ReservationStatus.BOOKED)
         {
             if(!isReservationCancellable(reservation.getShow()))

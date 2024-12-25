@@ -5,22 +5,26 @@ import com.project.mrs.dto.PagedAPIResponseDTO;
 import com.project.mrs.dto.show.ShowRequestDTO;
 import com.project.mrs.entity.Show;
 import com.project.mrs.service.ShowService;
+import com.project.mrs.validation.UserRoleValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/shows")
 public class ShowController {
 
-    ShowService showService;
+    private final ShowService showService;
+    private final UserRoleValidationService userRoleValidationService;
 
     @Autowired
-    ShowController(ShowService showService)
+    ShowController(ShowService showService, UserRoleValidationService userRoleValidationService)
     {
         this.showService = showService;
+        this.userRoleValidationService = userRoleValidationService;
     }
 
     @GetMapping("/all")
@@ -119,6 +123,7 @@ public class ShowController {
                 );
     }
 
+    @PreAuthorize("@userRoleValidationService.isUserHavePermissionToPerformWriteOperationForScreen(#showRequestDTO.screenId)")
     @PostMapping("/show/create")
     public ResponseEntity<APIResponseDTO> createNewShow(@RequestBody ShowRequestDTO showRequestDTO)
     {
@@ -133,6 +138,7 @@ public class ShowController {
                 );
     }
 
+    @PreAuthorize("@userRoleValidationService.isUserHavePermissionToPerformWriteOperationForShow(#showId)")
     @PutMapping("/show/{showId}")
     public ResponseEntity<APIResponseDTO> updateShowById(@PathVariable Long showId,@RequestBody ShowRequestDTO showRequestDTO)
     {
@@ -147,6 +153,7 @@ public class ShowController {
                 );
     }
 
+    @PreAuthorize("@userRoleValidationService.isUserHavePermissionToPerformWriteOperationForShow(#showId)")
     @DeleteMapping("/show/{showId}")
     public ResponseEntity<APIResponseDTO> deleteShowById(@PathVariable Long showId)
     {

@@ -18,8 +18,8 @@ import java.util.List;
 @Service
 public class ScreenService {
 
-    ScreenRepository screenRepository;
-    SeatService seatService;
+    private final ScreenRepository screenRepository;
+    private final SeatService seatService;
 
     @Autowired
     ScreenService(ScreenRepository screenRepository,SeatService seatService)

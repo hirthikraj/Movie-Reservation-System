@@ -3,8 +3,11 @@ package com.project.mrs.service;
 import com.project.mrs.constants.ExceptionConstants;
 import com.project.mrs.dto.screen.ScreenRequestDTO;
 import com.project.mrs.dto.theatre.TheatreRequestDTO;
+import com.project.mrs.dto.user.TheatreAdminRequestDTO;
 import com.project.mrs.entity.Screen;
 import com.project.mrs.entity.Theatre;
+import com.project.mrs.entity.TheatreVsAdmin;
+import com.project.mrs.entity.User;
 import com.project.mrs.exception.TheatreNotFoundException;
 import com.project.mrs.repository.TheatreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +23,15 @@ import java.util.List;
 @Service
 public class TheatreService {
 
-    TheatreRepository theatreRepository;
-    ScreenService screenService;
+    private final TheatreRepository theatreRepository;
+    private final UserService userService;
+    private final ScreenService screenService;
 
     @Autowired
-    TheatreService(TheatreRepository theatreRepository,ScreenService screenService)
+    TheatreService(TheatreRepository theatreRepository, UserService userService, ScreenService screenService)
     {
         this.theatreRepository = theatreRepository;
+        this.userService = userService;
         this.screenService = screenService;
     }
 
@@ -45,6 +50,8 @@ public class TheatreService {
 
     public Theatre createNewTheatre(TheatreRequestDTO theatreRequestDTO)
     {
+        User theatreAdmin = userService.getUserById(theatreRequestDTO.getTheatreAdminId());
+
         Theatre theatre = Theatre
                 .builder()
                 .theatreName(theatreRequestDTO.getTheatreName())
@@ -52,6 +59,13 @@ public class TheatreService {
                 .totalBookings(0)
                 .totalRevenue(0D)
                 .build();
+
+        List<TheatreVsAdmin> theatreAdmins = new ArrayList<>();
+        TheatreVsAdmin theatreVsAdmin = createTheatreVsAdmin(theatre,theatreAdmin);
+        theatreAdmins.add(theatreVsAdmin);
+        theatre.setTheatreAdmins(theatreAdmins);
+
+        userService.promoteUser(theatreAdmin);
 
         List<Screen> screens = new ArrayList<>();
         for(ScreenRequestDTO screenRequestDTO : theatreRequestDTO.getScreens())
@@ -77,13 +91,54 @@ public class TheatreService {
                 .orElseThrow(() -> new TheatreNotFoundException(ExceptionConstants.THEATRE_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
 
+    public Theatre addTheatreAdmin(TheatreAdminRequestDTO theatreAdminRequestDTO)
+    {
+        User theatreAdmin = userService.getUserById(theatreAdminRequestDTO.getUserId());
+        return  theatreRepository
+                .findById(theatreAdminRequestDTO.getTheatreId())
+                .map(Theatre -> {
+                    List<TheatreVsAdmin> theatreAdmins = Theatre.getTheatreAdmins();
+                    TheatreVsAdmin theatreVsAdmin = createTheatreVsAdmin(Theatre,theatreAdmin);
+                    theatreAdmins.add(theatreVsAdmin);
+                    Theatre.setTheatreAdmins(theatreAdmins);
+                    userService.promoteUser(theatreAdmin);
+                    return theatreRepository.save(Theatre);
+                })
+                .orElseThrow(() -> new TheatreNotFoundException(ExceptionConstants.THEATRE_NOT_FOUND, HttpStatus.NOT_FOUND));
+    }
+
+    public Theatre removeTheatreAdmin(TheatreAdminRequestDTO theatreAdminRequestDTO)
+    {
+        User theatreAdmin = userService.getUserById(theatreAdminRequestDTO.getUserId());
+        return  theatreRepository
+                .findById(theatreAdminRequestDTO.getTheatreId())
+                .map(Theatre -> {
+                    List<TheatreVsAdmin> theatreAdmins = Theatre.getTheatreAdmins();
+                    TheatreVsAdmin theatreVsAdmin = createTheatreVsAdmin(Theatre,theatreAdmin);
+                    theatreAdmins.remove(theatreVsAdmin);
+                    Theatre.setTheatreAdmins(theatreAdmins);
+                    // Need to de promote the user if not admin of any other theatre
+                    return theatreRepository.save(Theatre);
+                })
+                .orElseThrow(() -> new TheatreNotFoundException(ExceptionConstants.THEATRE_NOT_FOUND, HttpStatus.NOT_FOUND));
+    }
+
+    public TheatreVsAdmin createTheatreVsAdmin(Theatre theatre,User theatreAdmin)
+    {
+        return TheatreVsAdmin
+                .builder()
+                .theatre(theatre)
+                .user(theatreAdmin)
+                .build();
+    }
+
     public void deleteTheatreById(Long theatreId)
     {
         theatreRepository.deleteById(theatreId);
     }
 
-    public Theatre updateTheatre(Theatre theatre)
+    public void updateTheatre(Theatre theatre)
     {
-        return theatreRepository.save(theatre);
+        theatreRepository.save(theatre);
     }
 }

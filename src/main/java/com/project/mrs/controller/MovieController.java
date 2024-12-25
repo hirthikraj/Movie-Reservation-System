@@ -9,13 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/movies")
 public class MovieController {
 
-    MovieService movieService;
+    private final MovieService movieService;
 
     @Autowired
     MovieController(MovieService movieService)
@@ -56,6 +57,7 @@ public class MovieController {
                 );
     }
 
+    @Secured("ROLE_SUPER_ADMIN")
     @PostMapping("/movie/create")
     public ResponseEntity<APIResponseDTO> createNewMovie(@RequestBody MovieRequestDTO MovieRequestDTO)
     {
@@ -70,6 +72,7 @@ public class MovieController {
                 );
     }
 
+    @Secured("ROLE_SUPER_ADMIN")
     @PutMapping("movie/{movieId}")
     public ResponseEntity<APIResponseDTO> updateMovieById(@PathVariable Long movieId,@RequestBody MovieRequestDTO movieRequestDTO)
     {
@@ -84,6 +87,7 @@ public class MovieController {
                 );
     }
 
+    @Secured("ROLE_SUPER_ADMIN")
     @DeleteMapping("movie/{movieId}")
     public ResponseEntity<APIResponseDTO> deleteMovieById(@PathVariable Long movieId)
     {

@@ -3,6 +3,7 @@ package com.project.mrs.service;
 import com.project.mrs.constants.ExceptionConstants;
 import com.project.mrs.dto.user.UserRequestDTO;
 import com.project.mrs.entity.User;
+import com.project.mrs.enums.UserRole;
 import com.project.mrs.enums.UserStatus;
 import com.project.mrs.exception.UserConflictException;
 import com.project.mrs.exception.UserNotFoundException;
@@ -33,20 +34,21 @@ public class UserService {
 
     public User createNewUser(UserRequestDTO userRequestDTO)
     {
-        if(userRepository.findByUserNameOrUserEmail(userRequestDTO.getUserName(),userRequestDTO.getUserEmail()).isPresent())
+        if(userRepository.findByUsernameOrUserEmail(userRequestDTO.getUsername(),userRequestDTO.getUserEmail()).isPresent())
         {
             throw new UserConflictException("User with the same username or email already exists", HttpStatus.CONFLICT);
         }
 
         User user = User.builder()
-                .userName(userRequestDTO.getUserName())
-                .userPassword(userRequestDTO.getUserPassword())
+                .username(userRequestDTO.getUsername())
+                .password(userRequestDTO.getPassword())
                 .firstName(userRequestDTO.getFirstName())
                 .lastName(userRequestDTO.getLastName())
                 .userEmail(userRequestDTO.getUserEmail())
                 .userStatus(UserStatus.ACTIVE)
                 .userCreatedAt(LocalDateTime.now())
                 .userUpdatedAt(LocalDateTime.now())
+                .userRole(UserRole.ROLE_USER)
                 .build();
 
         return userRepository.save(user);
@@ -66,16 +68,34 @@ public class UserService {
                 .map(User -> {
                     User.setFirstName(userRequestDTO.getFirstName());
                     User.setLastName(userRequestDTO.getLastName());
-                    User.setUserPassword(userRequestDTO.getUserPassword());
+                    User.setPassword(userRequestDTO.getPassword());
                     User.setUserUpdatedAt(LocalDateTime.now());
                     return userRepository.save(User);
                 })
                 .orElseThrow(() -> new UserNotFoundException(ExceptionConstants.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
 
+    public User promoteUser(User user)
+    {
+        user.setUserRole(UserRole.ROLE_THEATRE_ADMIN);
+        return userRepository.save(user);
+    }
+
     public void deleteUserById(Long userId)
     {
         userRepository.deleteById(userId);
+    }
+
+    public User getUserByUserName(String userName)
+    {
+        return userRepository
+                .findByUsername(userName)
+                .orElseThrow(() -> new UserNotFoundException(ExceptionConstants.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+    }
+
+    public boolean isUserPresentByUserNameOrUserEmail(String userName,String userEmail)
+    {
+        return userRepository.findByUsernameOrUserEmail(userName,userEmail).isPresent();
     }
 }
 

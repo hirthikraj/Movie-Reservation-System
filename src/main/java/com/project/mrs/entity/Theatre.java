@@ -25,9 +25,8 @@ public class Theatre {
 
     private Double totalRevenue;
 
-    @ManyToOne
-    @JoinColumn(name = "theatre_admin")
-    private User theatreAdmin;
+    @OneToMany(mappedBy = "theatre", cascade = CascadeType.ALL)
+    private List<TheatreVsAdmin> theatreAdmins;
 
     @OneToMany(mappedBy = "theatre",cascade = CascadeType.ALL)
     List<Show> shows;
