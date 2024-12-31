@@ -51,6 +51,7 @@ public class UserController {
     @PostMapping("/user/create")
     public ResponseEntity<APIResponseDTO> createNewUser(@RequestBody UserRequestDTO userRequestDTO)
     {
+
         User newUser = userService.createNewUser(userRequestDTO);
 
         UserResponseDTO userResponseDTO = UserResponseDTO.builder()

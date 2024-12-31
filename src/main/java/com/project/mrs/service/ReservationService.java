@@ -10,6 +10,8 @@ import com.project.mrs.exception.ReservationNotCancellableException;
 import com.project.mrs.exception.ReservationNotFoundException;
 import com.project.mrs.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,11 @@ public class ReservationService {
         this.showService = showService;
         this.userService = userService;
         this.theatreService = theatreService;
+    }
+
+    public Page<Reservation> getAllReservationsForUser(Long userId,int page, int pageSize)
+    {
+        return reservationRepository.findByUser_UserId(userId,PageRequest.of(page,pageSize));
     }
 
     public Reservation getReservationById(Long reservationId)
