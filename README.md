@@ -13,6 +13,8 @@ Tools & Technologies used :
 - lombok
 - JSON Web Token
 
+Project Link : https://roadmap.sh/projects/movie-reservation-system
+
 ## Entities
 
 ### Movie
