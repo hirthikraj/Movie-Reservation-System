@@ -9,7 +9,7 @@ Tools & Technologies used :
 - Spring Security
 - Spring Data JPA
 - Spring Web
-- h2 database (In-memory Database
+- h2 database (In-memory Database)
 - lombok
 - hibernate
 - JSON Web Token
