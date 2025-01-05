@@ -11,6 +11,7 @@ Tools & Technologies used :
 - Spring Web
 - h2 database (In-memory Database
 - lombok
+- hibernate
 - JSON Web Token
 
 Project Link : https://roadmap.sh/projects/movie-reservation-system
